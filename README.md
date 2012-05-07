@@ -14,16 +14,16 @@ class heirarchy is laid out as:
 
     pwa.signalR.Connection
     pwa.signalR.Hub
-    pwa.signal.R.transport.ForeverFrame
-    pwa.signal.R.transport.LongPolling
-    pwa.signal.R.transport.ServerSentEvents
-    pwa.signal.R.transport.WebSockes
+    pwa.signalR.transport.ForeverFrame
+    pwa.signalR.transport.LongPolling
+    pwa.signalR.transport.ServerSentEvents
+    pwa.signalR.transport.WebSockes
     
-The various transpose classes register themselved with a new `pwa.signalR.manifest` object that takes the place
+The various transport classes register themselves with a new `pwa.signalR.manifest` object that takes the place
 of the `transports` array in the original jQuery code.  The `manifest` maps transport names to dojo classes
 which means that one can extend and replace built-in transports or add your own easily.
 
-There are also two layer files, `pwa.signalR` and `pwa.signalrR-all`.  The former loads just the `Connection` and
+There are also two layer files, `pwa.signalR` and `pwa.signalR-all`.  The former loads just the `Connection` and
 `Hub` classes and requires the caller to explicitly load the transport layers they wish to support.  The latter
 layer file loads all of the transports by default.
 
@@ -43,7 +43,7 @@ Using the client from Dojo is fairly simple, assuming one is familiar with Dojo 
         pwa.signalR.Hubs("/signalr/hubs", function(signalr, connection, hub) {
         
             // The signalr object is analagous to the $.signalR object from the jQuery plugin,
-            // connection is the pwa.signalR.Connection class and hub is a pwa.signalr.Hub object
+            // connection is the pwa.signalR.Connection class and hub is a pwa.signalR.Hub object
             
             // Look for a 'chat' hub proxy
             if ( signalr && signalr.chat ) {
