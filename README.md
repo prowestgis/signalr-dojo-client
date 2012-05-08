@@ -27,7 +27,7 @@ There are also two layer files, `pwa.signalR` and `pwa.signalR-all`.  The former
 `Hub` classes and requires the caller to explicitly load the transport layers they wish to support.  The latter
 layer file loads all of the transports by default.
 
-There is a `pwa.signalR.Hubs` helper function that should be used to connect to the `~/signalr/hubs` endpo
+There is a `pwa.signalR.Hubs` helper function that should be used to connect to the `~/signalr/hubs` endpoint.
 
 Example
 -------
