@@ -130,7 +130,7 @@ dojo.declare("pwa.signalR.Hub", null, {
 			if (!result.Id) {
 				this.executeCallback(result.Hub, result.Method, result.Args, result.State);
 			} else {
-				this.callbackId = result.Id.toString();
+				callbackId = result.Id.toString();
 				cb = this.callbacks[callbackId];
 				if (cb) {
 					this.callbacks[callbackId] = null;
@@ -168,7 +168,7 @@ dojo.declare("pwa.signalR.Hub", null, {
 				hub[method] = function(serverMethod) {
 					return function() {
 						return self.serverCall(hub, serverMethod, arguments);
-					}
+					};
 				}(this._capitalize(method));
 			}
 		}
