@@ -2,6 +2,8 @@ dojo.provide("pwa.signalR.Connection");
 
 dojo.declare("pwa.signalR.Connection", null, {
 
+    ajaxDataType: "json",
+
     logging: false,
 
     reconnectDelay: 2000,
@@ -32,32 +34,34 @@ dojo.declare("pwa.signalR.Connection", null, {
         /// <param name="callback" type="Function">A callback function to execute when the connection has started</param>
         var connection = this,
             config = {
-                transport: "auto"
+                transport: "auto",
+                xdomain: false
             },
             initialize,
-            promise = new dojo.Deferred();
+            deferred = new dojo.Deferred();
 
         if (connection.transport) {
             // Already started, just return
-            promise.resolve(connection);
-            return promise;
+            deferred.resolve(connection);
+            return deferred;
         }
 
         if (dojo.isFunction(options)) {
             // Support calling with single callback parameter
             callback = options;
         } else if (dojo.isObject(options)) {
-            config = dojo.mixin(config, options);
+            dojo.mixin(config, options);
             if (dojo.isFunction(config.callback)) {
                 callback = config.callback;
             }
         }
+        connection.ajaxDataType = config.xdomain ? "jsonp" : "json";
 
         dojo.connect( connection, "onStart", function (e, data) {
             if (dojo.isFunction(callback)) {
                 callback.call(connection);
             }
-            promise.resolve(connection);
+            deferred.resolve(connection);
         });
 
         initialize = function (transports, index) {
@@ -65,20 +69,19 @@ dojo.declare("pwa.signalR.Connection", null, {
             if (index >= transports.length) {
                 if (!connection.transport) {
                     // No transport initialized successfully
-                    promise.reject("SignalR: No transport could be initialized successfully. Try specifying a different transport or none at all for auto initialization.");
+                    deferred.reject("SignalR: No transport could be initialized successfully. Try specifying a different transport or none at all for auto initialization.");
                 }
                 return;
             }
 
             var transportName = transports[index],
                 transport = dojo.isObject(transportName) ? 
-					transportName : 
-					new dojo.getObject(transportName)();
-			
+                    transportName : 
+                    new dojo.getObject(transportName)();
+
             transport.start(connection, function () {
-				// Set the transport logger
+                // Set the transport logger
                 connection.transport = transport;
-				//connection.transport.log = dojo.hitch(connection, connection.log);
                 connection.onStart();
             }, function () {
                 initialize(transports, index + 1);
@@ -88,11 +91,12 @@ dojo.declare("pwa.signalR.Connection", null, {
         window.setTimeout(function () {
             dojo.xhrPost({
                 url: connection.url + "/negotiate",
-                headers: { "Content-Type": "application/json"},
+                preventCache: true,
                 handleAs: "json",
+                // handleAs: connection.ajaxDataType ???
                 error: function (error) {
                     connection.onError(error);
-                    promise.reject("SignalR: Error during negotiation request: " + error);
+                    deferred.reject("SignalR: Error during negotiation request: " + error);
                 },
                 load: function (res) {
                     connection.appRelativeUrl = res.Url;
@@ -101,7 +105,7 @@ dojo.declare("pwa.signalR.Connection", null, {
 
                     if (!res.ProtocolVersion || res.ProtocolVersion !== "1.0") {
                         connection.onError("SignalR: Incompatible protocol version.");
-                        promise.reject("SignalR: Incompatible protocol version.");
+                        deferred.reject("SignalR: Incompatible protocol version.");
                         return;
                     }
 
@@ -138,10 +142,10 @@ dojo.declare("pwa.signalR.Connection", null, {
             });
         }, 0);
 
-        return promise;
+        return deferred;
     },
 
-	/* Deprecated jQuery event callbacks */
+    /* Deprecated jQuery event callbacks */
     starting: function (callback) {
         return this;
     },
@@ -232,13 +236,13 @@ dojo.declare("pwa.signalR.Connection", null, {
         if (typeof (window.console) === "undefined") {
             return;
         }
-		d = new Date();
-		if ( d.toLocaleFormat ) {
-			d = d.toLocaleFormat();
-		} else if ( d.toTimeString ) {
-			d = d.toTimeString();
-		}
-		
+        d = new Date();
+        if ( d.toLocaleFormat ) {
+            d = d.toLocaleFormat();
+        } else if ( d.toTimeString ) {
+            d = d.toTimeString();
+        }
+
         m = "[" + d + "] SignalR: " + msg;
         if (window.console.debug) {
             window.console.debug(m);
