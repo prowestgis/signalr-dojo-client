@@ -69,17 +69,18 @@ dojo.declare("pwa.signalR.transports.WebSockets", [ pwa.signalR._TransportLogic 
             connection.socket.onmessage = function (event) {
                 var data = dojo.fromJson(event.data);
                 if (data) {
+                    $connection = connection;
                     if (data.Messages) {
                         dojo.forEach(data.Messages, function (msg) {
                             try {
-                                connection.onReceived(msg);
+                                $connection.onReceived(msg);
                             }
                             catch (e) {
                                 this.log("Error raising received " + e, connection.logging);
                             }
                         });
                     } else {
-                        connection.onReceived(data);
+                        $connection.onReceived(data);
                     }
                 }
             };

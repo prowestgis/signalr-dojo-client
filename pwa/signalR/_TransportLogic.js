@@ -48,10 +48,11 @@ dojo.declare("pwa.signalR._TransportLogic", null, {
     ajaxSend: function (connection, data) {
         var url = connection.url + "/send" + "?transport=" + connection.transport.name + "&connectionId=" + window.escape(connection.id);
         url = this.addQs(url, connection);
-		// Send data as x-www-form-urlencoded, receive as application/json
+        // Send data as x-www-form-urlencoded, receive as application/json
         dojo.xhrPost({
             url: url,
-            handleAs: "json",            
+            handleAs: "json",
+            // handleAs: connection.ajaxDataType ???
             content: {data: data},
             load: function (result) {
                 if (result) {
@@ -59,7 +60,8 @@ dojo.declare("pwa.signalR._TransportLogic", null, {
                 }
             },
             error: function (errData, textStatus) {
-                if (textStatus === "abort") {
+                if (textStatus === "abort" ||
+                    (textStatus === "parsererror" && connection.ajaxDataType === "jsonp")) {
                     return;
                 }
                 connection.onError(errData);
@@ -91,8 +93,14 @@ dojo.declare("pwa.signalR._TransportLogic", null, {
                     }
                 }, this);
             }
-            connection.messageId = data.MessageId;
-            connection.groups = data.TransportData.Groups;
+            
+            if (data.MessageId) {
+                connection.messageId = data.MessageId;
+            }
+
+            if (data.TransportData) {
+                connection.groups = data.TransportData.Groups;
+            }
         }
     },
 

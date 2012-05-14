@@ -33,11 +33,9 @@ dojo.declare("pwa.signalR.transports.LongPolling", [ pwa.signalR._TransportLogic
                     reconnectFired = false;
 
                 instance.pollXhr = dojo.xhrGet({
-
                     url: url,
-
                     handleAs: "json",
-
+                    // handleAs: connection.ajaxDataType ??
                     load: function (data) {
                         var delay = 0,
                             timedOutReceived = false;
@@ -51,7 +49,9 @@ dojo.declare("pwa.signalR.transports.LongPolling", [ pwa.signalR._TransportLogic
                         }
 
                         that.processMessages(instance, data);
-                        if (data && typeof data.TransportData.LongPollDelay === "number") {
+                        if (data && 
+                            data.TransportData &&
+                            typeof data.TransportData.LongPollDelay === "number") {
                             delay = data.TransportData.LongPollDelay;
                         }
 
